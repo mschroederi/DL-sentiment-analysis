@@ -3,3 +3,5 @@ aclImdb_v1
 
 # VSCode
 .vscode
+
+__pycache__
