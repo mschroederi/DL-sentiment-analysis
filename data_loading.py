@@ -13,8 +13,8 @@ def read_raw_reviews(data_path: str) -> List[str]:
 
 # Create pd.DataFrame from reviews with the provided label
 def reviews_to_df(reviews: List[str], label: int) -> pd.DataFrame:
-    labels = [1 for _ in range(len(reviews))]
-    return pd.DataFrame(list(zip(reviews, labels)), columns =['review', 'label'])
+    labels = [label for _ in range(len(reviews))]
+    return pd.DataFrame(list(zip(reviews, labels)), columns =['review', 'sentiment'])
 
 # Build pd.DataFrame containing positive and negative reviews
 def load_reviews(data_path: str) -> pd.DataFrame:
@@ -23,10 +23,10 @@ def load_reviews(data_path: str) -> pd.DataFrame:
     return pd.concat([pos_reviews, neg_reviews])
 
 # load train data
-train_df = load_reviews('./data/train')
+train_df = load_reviews('./aclImdb_v1/train')
 # load test data
-test_df = load_reviews('./data/test')
+test_df = load_reviews('./aclImdb_v1/test')
 
 # Write to CSV files
-train_df.to_csv('./train.csv', index=False)
-test_df.to_csv('./test.csv', index=False)
+train_df.to_csv('./data/train.csv', index=False)
+test_df.to_csv('./data/test.csv', index=False)
