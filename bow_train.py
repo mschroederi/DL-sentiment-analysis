@@ -53,8 +53,8 @@ def train_epoch(model: nn.Module, dataloader: DataLoader, embedding, loss_functi
     l1_lambda = 0.001
     model.train()
     for i, sample_batched in enumerate(dataloader):
-        progress = i * 100 / len(dataloader)
-        print("Progress: {}%".format(np.round(progress, 2), end="\r")
+        progress = np.round(i * 100 / len(dataloader), 2)
+        print("Train Epoch Progress: {}%".format(progress), end="\r")
         y = sample_batched["sentiment"].type(torch.FloatTensor)
         y = torch.unsqueeze(y, 1)
         bow = sample_batched["review"].type(torch.FloatTensor)
@@ -84,11 +84,6 @@ def test(model: nn.Module, dataloader: DataLoader, embedding, loss_function) -> 
             bow = sample_batched["review"].type(torch.FloatTensor)
             y_hat = model(bow)
             
-            # print(y)
-            # print(y_hat)
-            # print(prediction)
-            # print(prediction == y)
-            # print((prediction == y).sum().item())
             prediction = y_hat >= 0
             matches += (prediction == y).sum().item()
             l = loss_function(y_hat, y)
@@ -151,7 +146,6 @@ if __name__ == "__main__":
     print("Initial Test Accuracy: {}".format(results["accuracy"]))
     for epoch in range(num_epochs):
         train_loss_epoch = train_epoch(model, train_loader, embedding, loss, optimizer)
-        print("Finished Training")
         results = test(model, test_loader, embedding, loss)
         print("Epoch: {}, Train Loss: {}, Test Acc: {}".format(epoch+1, train_loss_epoch, results["accuracy"]))
 
