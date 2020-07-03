@@ -2,13 +2,17 @@ import torch
 from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 
-from data_loader import MovieSentimentDataset
+from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
 from embeddings.bag_of_words import BagOfWords
 from models.bow_classifier import BowClassifier
 
 
 if __name__ == '__main__':
-    dataset = MovieSentimentDataset(csv_file='data/train.csv')
+    dataset_train, dataset_validation = MovieSentimentDatasetBuilder\
+        .from_csv(csv_file='data/train.csv')\
+        .with_train_validation_split(splits=[.8, .2])
+
+    dataset = dataset_train
     # Restrict the number of reviews for now due to long run time
     dataset.movie_sentiments = dataset.movie_sentiments.sample(100)
     dataloader = DataLoader(dataset, batch_size=8, shuffle=True, num_workers=1)
@@ -42,7 +46,7 @@ if __name__ == '__main__':
             trainer.zero_grad()
             l.backward()
             trainer.step()
-            n += len(sample_batched)
+            n += len(y)
 
         train_loss_epoch /= n
         print("Epoch: {}, Train Loss: {}".format(epoch+1, train_loss_epoch))

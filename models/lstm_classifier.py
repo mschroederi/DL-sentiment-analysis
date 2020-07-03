@@ -20,15 +20,7 @@ class LSTMClassifier(nn.Module):
         )
 
     def forward(self, reviews):
-        # print("len(reviews): ", len(reviews))
-        # print("reviews.shape: ", reviews.shape)
         reviews_embedded = self.embbedding(reviews)
-        # print("reviews_embedded.shape: ", reviews_embedded.shape)
         reviews_embedded_permuted = reviews_embedded.permute(1, 0, 2)
-        # print("reviews_embedded_permuted.shape: ", reviews_embedded_permuted.shape)
         lstm_output, lstm_hidden = self.rnn(reviews_embedded_permuted)
-        # print("lstm_output.shape: ", lstm_output.shape)
-        # print("lstm_hidden[0].shape: ", lstm_hidden[0].shape)
-        #last_output = output[-1,:,:]
-        #print("last_output.shape: ", last_output.shape)
         return self.out(lstm_hidden[0].reshape(-1, self.hidden_size))
