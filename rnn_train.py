@@ -32,7 +32,7 @@ if __name__ == '__main__':
     def execute_preprocessing_pipeline(dataset: MovieSentimentDataset, tokenizer=None):
         reviews = dataset.movie_sentiments["review"]
         dataset.movie_sentiments["review"] = Preprocessor.remove_symbols(dataset.movie_sentiments["review"])
-        dataset.movie_sentiments = Preprocessor.remove_long_sequences(dataset.movie_sentiments, max_len=500)
+        dataset.movie_sentiments = Preprocessor.remove_long_sequences(dataset.movie_sentiments, max_len=200)
 
         if tokenizer is None:
             tokenizer = SequenceTokenizer()
@@ -45,19 +45,19 @@ if __name__ == '__main__':
     execute_preprocessing_pipeline(dataset_validation, tokenizer=tokenizer)
 
     # Create DataLoader
-    dataloader_train = DataLoader(dataset_train, batch_size=8, shuffle=True, num_workers=1)
-    dataloader_validation = DataLoader(dataset_validation, batch_size=32, shuffle=False, num_workers=1)
+    dataloader_train = DataLoader(dataset_train, batch_size=256, shuffle=True, num_workers=1)
+    dataloader_validation = DataLoader(dataset_validation, batch_size=256, shuffle=False, num_workers=1)
 
     # Set up a bag of words model and training
-    embedding_size = 1024
-    model = LSTMClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=embedding_size, hidden_size=128).to(device)
+    embedding_size = 16
+    model = LSTMClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=embedding_size, hidden_size=4).to(device)
     loss = nn.BCELoss()
     num_epochs = 50
-    lr = 0.5
-    trainer = optim.SGD(model.parameters(), lr)
+    lr = 1e-2
+    trainer = optim.Adam(model.parameters(), lr=lr, weight_decay=2e-3)
 
     for epoch in range(num_epochs):
-        train_loss_epoch, n = 0.0, 0
+        train_loss_epoch, train_acc, n = 0.0, 0, 0
         model.train()
         for i_batch, sample_batched in enumerate(dataloader_train):
             y = sample_batched["sentiment"].type(torch.FloatTensor).to(device).reshape(-1, 1)
@@ -68,9 +68,11 @@ if __name__ == '__main__':
             trainer.zero_grad()
             l.backward()
             trainer.step()
+            train_acc += (y == (y_hat > .5).type(torch.FloatTensor).to(device)).sum().item()
             n += len(y)
         
         train_loss_epoch /= n
+        train_acc /= n
 
         if (epoch+1) % 1 == 0:
             validation_loss, validation_acc, n = 0, 0, 0
@@ -85,16 +87,6 @@ if __name__ == '__main__':
                 
             validation_loss /= n
             validation_acc /= n
-            print("Epoch: {}, Train Loss: {}, Validation Loss: {}, Validation Accuracy: {}".format(epoch+1, train_loss_epoch, validation_loss, validation_acc))
+            print("Epoch: {}, Train Loss: {}, Train acc: {}, Validation Loss: {}, Validation acc: {}".format(epoch+1, train_loss_epoch, train_acc, validation_loss, validation_acc))
         else:
-            print("Epoch: {}, Train Loss: {}".format(epoch+1, train_loss_epoch))
-
-    # # Find the words that are responsible for sentiment
-    # param = next(model.parameters())
-    # transform = embedding.embedding.inverse_transform
-    # _, max_indices = torch.topk(param, 10, largest=True)
-    # _, min_indices = torch.topk(param, 10, largest=False)
-    # print("Words that speak for a good review:")
-    # print(transform(max_indices[0].tolist()))
-    # print("Words that speak for a bad review:")
-    # print(transform(min_indices[0].tolist()))
+            print("Epoch: {}, Train Loss: {}, Train acc: {}".format(epoch+1, train_loss_epoch, train_acc))

@@ -11,12 +11,10 @@ class LSTMClassifier(nn.Module):
         self.hidden_size = hidden_size
 
         self.embbedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_size, padding_idx=0)
-        self.rnn = nn.LSTM(input_size=embedding_size, hidden_size=hidden_size)
+        self.rnn = nn.LSTM(input_size=embedding_size, hidden_size=hidden_size, dropout=1)
 
         self.out = nn.Sequential(
-            nn.Linear(hidden_size, 32), nn.ReLU(),
-            nn.Linear(32, 8), nn.ReLU(),
-            nn.Linear(8, 1), nn.Sigmoid()
+            nn.Linear(hidden_size, 1), nn.Sigmoid()
         )
 
     def forward(self, reviews):
