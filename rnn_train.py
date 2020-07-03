@@ -28,18 +28,21 @@ if __name__ == '__main__':
     reviews = dataset.movie_sentiments["review"]
     reviews = BagOfWords.preprocess(reviews)
 
-    encoder = OneHotSequenceEncoder()
+    encoder = OneHotSequenceEncoder(max_seq_len=500)
     dataset.movie_sentiments["review"] = encoder.fit_transform(reviews)
+    
+    dataset.movie_sentiments = dataset.movie_sentiments[dataset.movie_sentiments["review"] != "empty"]
+    
     print(dataset.movie_sentiments["review"].head())
 
     print("padding_size: ", encoder.padding_size)
 
     # Set up a bag of words model and training
-    embedding_size = encoder.embedding_size
-    model = LSTMClassifier(embedding_size=embedding_size, hidden_size=128)
+    embedding_size = 1024
+    model = LSTMClassifier(vocab_size=encoder.vocab_size, padding_size=encoder.padding_size, embedding_size=embedding_size, hidden_size=128)
     loss = nn.BCELoss()
     num_epochs = 10
-    lr = 0.2
+    lr = 0.5
     trainer = optim.SGD(model.parameters(), lr)
 
     for epoch in range(num_epochs):
@@ -47,8 +50,8 @@ if __name__ == '__main__':
         model.train()
         for i_batch, sample_batched in enumerate(dataloader):
             y = sample_batched["sentiment"].type(torch.FloatTensor)
-            y = y.reshape(-1, 1, 1)
-            y_hat = model(sample_batched["review"].reshape(-1, encoder.padding_size, 1))
+            y = y.reshape(-1, 1)
+            y_hat = model(sample_batched["review"].reshape(-1, encoder.padding_size))
             
             l = loss(y_hat, y)
             train_loss_epoch += l.item()
