@@ -4,7 +4,7 @@ from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 from typing import Dict, List
 
-from data_loader import MovieSentimentDataset
+from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
 from embeddings.bag_of_words import BagOfWords
 from models.bow_classifier import BowClassifier
 

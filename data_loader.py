@@ -6,16 +6,15 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
 
-
 class MovieSentimentDataset(Dataset):
     """Movie sentiment dataset."""
 
-    def __init__(self, csv_file, transform=None):
+    def __init__(self, data: pd.DataFrame, transform=None):
         """
         Args:
             csv_file (string): Path to the csv file with sentiments.
         """
-        self.movie_sentiments = pd.read_csv(csv_file)
+        self.movie_sentiments = data
 
     def __len__(self):
         return len(self.movie_sentiments)
@@ -33,3 +32,18 @@ class MovieSentimentDataset(Dataset):
         sample = {'review': review, 'sentiment': sentiment}
 
         return sample
+
+
+class MovieSentimentDatasetBuilder:
+    def __init__(self, data: pd.DataFrame):
+        self.data = data
+
+    @staticmethod
+    def from_csv(csv_file: str):
+        return MovieSentimentDatasetBuilder(data=pd.read_csv(csv_file))
+    
+    def with_train_validation_split(self, splits: (float, float)=[.8, .2]):
+        msk = np.random.rand(len(self.data)) < splits[0]
+        train = self.data[msk]
+        validation = self.data[~msk]
+        return (MovieSentimentDataset(data=train), MovieSentimentDataset(data=validation))
