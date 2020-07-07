@@ -14,7 +14,8 @@ class LSTMClassifier(nn.Module):
         self.rnn = nn.LSTM(input_size=embedding_size, hidden_size=hidden_size, dropout=1)
 
         self.out = nn.Sequential(
-            nn.Linear(hidden_size, 1), nn.Sigmoid()
+            nn.Linear(hidden_size, 4), nn.ReLU(),
+            nn.Linear(4, 1), nn.Sigmoid()
         )
 
     def forward(self, reviews):
