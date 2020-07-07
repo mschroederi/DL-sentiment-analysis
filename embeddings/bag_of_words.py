@@ -4,6 +4,7 @@ import pandas as pd
 from torch import Tensor
 from sklearn import preprocessing
 from typing import List, Set
+from collections import Counter
 
 SYMBOLS_TO_REMOVE = [".", "\"", "(", ")", ",", "?", "!", "'", ";", "{", "}", "-", "*", "=", ":", "\x91", "\x97", "<br />", "/", "<", ">"]
 
@@ -37,9 +38,17 @@ class BagOfWords:
         with open(file, "w") as f:
             f.write("\n".join(list(self.vocab)))
 
-    def spread_indices(self, indices: List[int]) -> np.array:
+    def spread_indices(self, indices: List[int], with_count: bool = True) -> np.array:
         pad = np.zeros(len(self.vocab))
-        pad[indices] = 1
+        if len(indices) == 0:
+            return pad
+
+        if with_count:
+            count = Counter(indices)
+            pad[list(count.keys())] = np.array(list(count.values()))
+        else:
+            pad[indices] = 1
+            
         return pad
 
     def _embed_series(self, texts: pd.Series, show_progress: bool = False) -> pd.Series:
@@ -48,29 +57,19 @@ class BagOfWords:
         
         return texts.str.split().apply(self.embedding.transform)
 
-    def embedding_to_tensor(self, embedded_texts: pd.Series) -> Tensor:
-        df = pd.DataFrame(columns=[0])
-        tensors = embedded_texts.map(lambda x: Tensor(spread_indices(x)))
-        return torch.stack(tensors)
+    def create_tensor(self, texts: List[str]) -> Tensor:
+        s = pd.Series(texts)
+        preprocessed = self.preprocess(s)
+        embedded = self._embed_series(preprocessed)
+        self.spread_indices()
 
-    def _embed_to_dataframe(self, texts: List[str]) -> pd.DataFrame:
-        columns = np.arange(0, len(self.vocab))
-        df = pd.DataFrame(columns=[0])
-
-        for i, text in enumerate(texts):
-            df.loc[i, 0] = self.embedding.transform(text.split()) # self.padding(text)
-        return df
-
-    def embed(self, texts: List[str]) -> Tensor:
-        df = self._embed_to_dataframe(texts)
-        return torch.Tensor(df.values)
+    @staticmethod
+    def preprocess_text(text: str):
+        for symbol in SYMBOLS_TO_REMOVE:
+            text = text.replace(symbol, " ")
+        text = " ".join([w for w in text.split() if w])
+        return text.lower()
 
     @staticmethod
     def preprocess(texts: pd.Series) -> pd.Series:
-        def preprocess_text(text: str):
-            for symbol in SYMBOLS_TO_REMOVE:
-                text = text.replace(symbol, " ")
-            text = " ".join([w for w in text.split() if w])
-            return text.lower()
-
-        return texts.str.lower().apply(preprocess_text)
+        return texts.str.lower().apply(BagOfWords.preprocess_text)

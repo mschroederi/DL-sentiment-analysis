@@ -1,35 +1,35 @@
+import ast
 import torch
 import numpy as np
+import pandas as pd
+
 from torch import nn, optim
 from torch.utils.data import Dataset, DataLoader
 from typing import Dict, List
-
-from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
-from embeddings.bag_of_words import BagOfWords
-from models.bow_classifier import BowClassifier
-
-
-import os
-import ast
-import io
-import torch
-import pandas as pd
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, utils
+from sklearn.model_selection import train_test_split
 
+from embeddings.bag_of_words import BagOfWords
+from models.bow_classifier import BowClassifier, DeepBowClassifier
 
 class BowMovieSentimentDataset(Dataset):
     """Movie sentiment dataset."""
 
-    def __init__(self, csv_file: str, embedding: BagOfWords, transform=None):
+    def __init__(self, movie_sentiments: pd.DataFrame, embedding: BagOfWords, with_count: bool = True):
         """
         Args:
             csv_file (string): Path to the csv file with sentiments.
         """
-        self.movie_sentiments = pd.read_csv(csv_file)
+        self.movie_sentiments = movie_sentiments.copy()
         self.movie_sentiments["review"] = self.movie_sentiments["review"].apply(ast.literal_eval)
         self.embedding = embedding
+        self.with_count = with_count
+
+    @classmethod
+    def from_csv(cls, csv_file: str, embedding: BagOfWords):
+        df = pd.read_csv(csv_file)
+        return cls(df, embedding)
 
     def __len__(self):
         return len(self.movie_sentiments)
@@ -39,7 +39,7 @@ class BowMovieSentimentDataset(Dataset):
             idx = idx.tolist()
 
         review = self.movie_sentiments.iloc[idx, 0]
-        t = self.embedding.spread_indices(review)
+        t = self.embedding.spread_indices(review, self.with_count)
 
         sentiment = self.movie_sentiments.iloc[idx, 1]
 
@@ -51,6 +51,7 @@ class BowMovieSentimentDataset(Dataset):
 def train_epoch(model: nn.Module, dataloader: DataLoader, embedding, loss_function, optimizer: optim.Optimizer) -> float:
     train_loss_epoch, n = 0.0, 0
     l1_lambda = 0.001
+    l1_lambda = 0
     model.train()
     for i, sample_batched in enumerate(dataloader):
         progress = np.round(i * 100 / len(dataloader), 2)
@@ -128,25 +129,40 @@ if __name__ == "__main__":
     vocab_size = len(embedding.vocab)
     print("Vocab Size: {}".format(vocab_size))
 
-    train_dataset = BowMovieSentimentDataset(csv_file="data/bow_train.csv", embedding=embedding)
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=4)
+    df = pd.read_csv("data/bow_train.csv")
+    train_df, validation_df = train_test_split(df, train_size=0.8)
+
+    train_dataset = BowMovieSentimentDataset(train_df, embedding=embedding, with_count=False)
+    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4)
     print("Created Train Batches")
-    test_dataset = BowMovieSentimentDataset(csv_file="data/bow_test.csv", embedding=embedding)
-    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=True, num_workers=4)
+    validation_dataset = BowMovieSentimentDataset(validation_df, embedding=embedding, with_count=False)
+    validation_loader = DataLoader(validation_dataset, batch_size=256, shuffle=True, num_workers=4)
+    print("Created Validation Batches")
+    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test.csv", embedding=embedding, with_count=False)
+    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=True, num_workers=4)
     print("Created Test Batches")
 
     # Set up a bag of words model and training
-    model = BowClassifier(vocab_size)
+    # model = BowClassifier(vocab_size)
+    model = DeepBowClassifier(vocab_size, 128)
+
+    # checkpoint_loc = "checkpoints/bow_model"
+    # model = torch.load(checkpoint_loc)
     loss = nn.BCEWithLogitsLoss()
-    num_epochs = 10
+    num_epochs = 5
     lr = 0.1
     optimizer = optim.SGD(model.parameters(), lr)
 
-    results = test(model, test_loader, embedding, loss)
-    print("Initial Test Accuracy: {}".format(results["accuracy"]))
+    results = test(model, validation_loader, embedding, loss)
+    print("Initial Validation Accuracy: {}".format(results["accuracy"]))
     for epoch in range(num_epochs):
         train_loss_epoch = train_epoch(model, train_loader, embedding, loss, optimizer)
-        results = test(model, test_loader, embedding, loss)
-        print("Epoch: {}, Train Loss: {}, Test Acc: {}".format(epoch+1, train_loss_epoch, results["accuracy"]))
+        results = test(model, validation_loader, embedding, loss)
+        print("Epoch: {}, Train Loss: {}, Validation Acc: {}".format(epoch+1, train_loss_epoch, results["accuracy"]))
 
-    evaluation(model, embedding)
+    checkpoint_loc = "checkpoints/bow_model"
+    torch.save(model, checkpoint_loc)
+    print("Saved Model")
+    final_results = test(model, test_loader, embedding, loss)
+    print("Test Acc: {}".format(final_results["accuracy"]))
+    # evaluation(model, embedding)
