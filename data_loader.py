@@ -37,13 +37,21 @@ class MovieSentimentDataset(Dataset):
 class MovieSentimentDatasetBuilder:
     def __init__(self, data: pd.DataFrame):
         self.data = data
+        self.train_validation_split = None
 
     @staticmethod
     def from_csv(csv_file: str):
         return MovieSentimentDatasetBuilder(data=pd.read_csv(csv_file))
     
     def with_train_validation_split(self, splits: (float, float)=[.8, .2]):
-        msk = np.random.rand(len(self.data)) < splits[0]
-        train = self.data[msk]
-        validation = self.data[~msk]
-        return (MovieSentimentDataset(data=train), MovieSentimentDataset(data=validation))
+        self.train_validation_split = splits
+        return self
+    
+    def build(self):
+        if self.train_validation_split is None:
+            return MovieSentimentDataset(data=self.data)
+        else:
+            msk = np.random.rand(len(self.data)) < self.train_validation_split[0]
+            train = self.data[msk]
+            validation = self.data[~msk]
+            return (MovieSentimentDataset(data=train), MovieSentimentDataset(data=validation))
