@@ -27,9 +27,9 @@ class BowMovieSentimentDataset(Dataset):
         self.with_count = with_count
 
     @classmethod
-    def from_csv(cls, csv_file: str, embedding: BagOfWords):
+    def from_csv(cls, csv_file: str, embedding: BagOfWords, with_count: bool = True):
         df = pd.read_csv(csv_file)
-        return cls(df, embedding)
+        return cls(df, embedding, with_count)
 
     def __len__(self):
         return len(self.movie_sentiments)
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # checkpoint_loc = "checkpoints/bow_model"
     # model = torch.load(checkpoint_loc)
     loss = nn.BCEWithLogitsLoss()
-    num_epochs = 5
+    num_epochs = 10
     lr = 0.1
     optimizer = optim.SGD(model.parameters(), lr)
 
