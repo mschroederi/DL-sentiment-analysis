@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 
 from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
 from models.lstm_classifier import LSTMClassifier
+from models.attention_rnn_classifier import AttentionRNNClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from embeddings.sequence_tokenizer import SequenceTokenizer
 from preprocessing.preprocessor import Preprocessor
@@ -51,13 +52,13 @@ if __name__ == '__main__':
     execute_preprocessing_pipeline(dataset_test, tokenizer=tokenizer)
 
     # Create DataLoader
-    dataloader_train = DataLoader(dataset_train, batch_size=256, shuffle=True, num_workers=1)
+    dataloader_train = DataLoader(dataset_train, batch_size=128, shuffle=True, num_workers=1)
     dataloader_validation = DataLoader(dataset_validation, batch_size=256, shuffle=False, num_workers=1)
     dataloader_test = DataLoader(dataset_test, batch_size=256, shuffle=False, num_workers=1)
 
     # Set up a bag of words model and training
-    embedding_size = 200
-    model = LSTMClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=embedding_size, hidden_size=32).to(device)
+    #model = LSTMClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=200, hidden_size=32).to(device)
+    model = AttentionRNNClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=50, hidden_size=20, attn_encoder_hidden_size=20).to(device)
     loss = nn.BCELoss()
     num_epochs = 50
     lr = 1e-2
