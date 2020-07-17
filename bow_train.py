@@ -50,7 +50,7 @@ class BowMovieSentimentDataset(Dataset):
 
 def train_epoch(model: nn.Module, dataloader: DataLoader, embedding, loss_function, optimizer: optim.Optimizer) -> float:
     train_loss_epoch, n = 0.0, 0
-    l1_lambda = 0.001
+    # l1_lambda = 0.0001
     l1_lambda = 0
     model.train()
     for i, sample_batched in enumerate(dataloader):
@@ -125,12 +125,13 @@ def evaluation(model: nn.Module, embedding) -> None:
 
 
 if __name__ == "__main__":
-    embedding = BagOfWords.from_vocab_file("data/bow_vocab.txt")
+    embedding = BagOfWords.from_vocab_file("data/bow_vocab2.txt")
     vocab_size = len(embedding.vocab)
     print("Vocab Size: {}".format(vocab_size))
 
-    df = pd.read_csv("data/bow_train.csv")
+    df = pd.read_csv("data/bow_train2.csv")
     train_df, validation_df = train_test_split(df, train_size=0.8)
+    # train_df = df
 
     train_dataset = BowMovieSentimentDataset(train_df, embedding=embedding, with_count=False)
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4)
@@ -138,27 +139,30 @@ if __name__ == "__main__":
     validation_dataset = BowMovieSentimentDataset(validation_df, embedding=embedding, with_count=False)
     validation_loader = DataLoader(validation_dataset, batch_size=256, shuffle=True, num_workers=4)
     print("Created Validation Batches")
-    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test.csv", embedding=embedding, with_count=False)
-    test_loader = DataLoader(test_dataset, batch_size=256, shuffle=True, num_workers=4)
+    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test2.csv", embedding=embedding, with_count=False)
+    test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=True, num_workers=4)
     print("Created Test Batches")
+    # validation_loader = test_loader
 
     # Set up a bag of words model and training
-    # model = BowClassifier(vocab_size)
-    model = DeepBowClassifier(vocab_size, 128)
+    model = BowClassifier(vocab_size)
+    # model = DeepBowClassifier(vocab_size, 128)
 
     # checkpoint_loc = "checkpoints/bow_model"
     # model = torch.load(checkpoint_loc)
     loss = nn.BCEWithLogitsLoss()
-    num_epochs = 10
-    lr = 0.1
-    optimizer = optim.SGD(model.parameters(), lr)
+    num_epochs = 3
+    # lr = 0.1
+    # optimizer = optim.SGD(model.parameters(), lr)
+    lr = 1e-2
+    optimizer = optim.Adam(model.parameters(), lr=lr)
 
     results = test(model, validation_loader, embedding, loss)
     print("Initial Validation Accuracy: {}".format(results["accuracy"]))
     for epoch in range(num_epochs):
         train_loss_epoch = train_epoch(model, train_loader, embedding, loss, optimizer)
         results = test(model, validation_loader, embedding, loss)
-        print("Epoch: {}, Train Loss: {}, Validation Acc: {}".format(epoch+1, train_loss_epoch, results["accuracy"]))
+        print("Epoch: {}, Train Loss: {}, Validation Loss: {}, Validation Acc: {}".format(epoch+1, train_loss_epoch, results["loss"], results["accuracy"]))
 
     checkpoint_loc = "checkpoints/bow_model"
     torch.save(model, checkpoint_loc)

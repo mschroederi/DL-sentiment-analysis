@@ -2,9 +2,10 @@ import torch
 import numpy as np
 import pandas as pd
 from torch import Tensor
-from sklearn import preprocessing
 from typing import List, Set
 from collections import Counter
+
+from embeddings.label_encoder import LabelEncoderExt
 
 SYMBOLS_TO_REMOVE = [".", "\"", "(", ")", ",", "?", "!", "'", ";", "{", "}", "-", "*", "=", ":", "\x91", "\x97", "<br />", "/", "<", ">"]
 
@@ -17,8 +18,8 @@ class BagOfWords:
 
     @classmethod
     def from_vocab(cls, vocab: Set[str]):
-        embedding = preprocessing.LabelEncoder()
-        embedding.fit_transform(list(vocab))
+        embedding = LabelEncoderExt()
+        embedding.fit(list(vocab))
         return cls(vocab, embedding)
 
     @classmethod
