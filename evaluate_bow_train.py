@@ -99,7 +99,7 @@ if __name__ == "__main__":
     print(vocab_size)
 
     test_df = pd.read_csv("data/bow_test2.csv")
-    test_dataset = BowMovieSentimentDataset(test_df, embedding=embedding, with_count=False)
+    test_dataset = BowMovieSentimentDataset(test_df, embedding=embedding, binary_vectorizer=True)
     test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=True, num_workers=4)
     print("Created Test Batches")
 

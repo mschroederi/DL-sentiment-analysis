@@ -16,7 +16,7 @@ from models.bow_classifier import BowClassifier, DeepBowClassifier
 class BowMovieSentimentDataset(Dataset):
     """Movie sentiment dataset."""
 
-    def __init__(self, movie_sentiments: pd.DataFrame, embedding: BagOfWords, with_count: bool = True):
+    def __init__(self, movie_sentiments: pd.DataFrame, embedding: BagOfWords, binary_vectorizer: bool = True):
         """
         Args:
             csv_file (string): Path to the csv file with sentiments.
@@ -24,12 +24,12 @@ class BowMovieSentimentDataset(Dataset):
         self.movie_sentiments = movie_sentiments.copy()
         self.movie_sentiments["review"] = self.movie_sentiments["review"].apply(ast.literal_eval)
         self.embedding = embedding
-        self.with_count = with_count
+        self.binary_vectorizer = binary_vectorizer
 
     @classmethod
-    def from_csv(cls, csv_file: str, embedding: BagOfWords, with_count: bool = True):
+    def from_csv(cls, csv_file: str, embedding: BagOfWords, binary_vectorizer: bool = True):
         df = pd.read_csv(csv_file)
-        return cls(df, embedding, with_count)
+        return cls(df, embedding, binary_vectorizer)
 
     def __len__(self):
         return len(self.movie_sentiments)
@@ -39,7 +39,7 @@ class BowMovieSentimentDataset(Dataset):
             idx = idx.tolist()
 
         review = self.movie_sentiments.iloc[idx, 0]
-        t = self.embedding.spread_indices(review, self.with_count)
+        t = self.embedding.spread_indices(review, self.binary_vectorizer)
 
         sentiment = self.movie_sentiments.iloc[idx, 1]
 
@@ -133,13 +133,13 @@ if __name__ == "__main__":
     train_df, validation_df = train_test_split(df, train_size=0.8)
     # train_df = df
 
-    train_dataset = BowMovieSentimentDataset(train_df, embedding=embedding, with_count=False)
+    train_dataset = BowMovieSentimentDataset(train_df, embedding=embedding, binary_vectorizer=True)
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4)
     print("Created Train Batches")
-    validation_dataset = BowMovieSentimentDataset(validation_df, embedding=embedding, with_count=False)
+    validation_dataset = BowMovieSentimentDataset(validation_df, embedding=embedding, binary_vectorizer=True)
     validation_loader = DataLoader(validation_dataset, batch_size=256, shuffle=True, num_workers=4)
     print("Created Validation Batches")
-    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test2.csv", embedding=embedding, with_count=False)
+    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test2.csv", embedding=embedding, binary_vectorizer=True)
     test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=True, num_workers=4)
     print("Created Test Batches")
     # validation_loader = test_loader

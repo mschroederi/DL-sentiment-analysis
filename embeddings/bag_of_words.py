@@ -39,17 +39,16 @@ class BagOfWords:
         with open(file, "w") as f:
             f.write("\n".join(list(self.vocab)))
 
-    def spread_indices(self, indices: List[int], with_count: bool = True) -> np.array:
+    def spread_indices(self, indices: List[int], binary_vectorizer: bool = True) -> np.array:
         pad = np.zeros(len(self.vocab))
         if len(indices) == 0:
             return pad
 
-        if with_count:
+        if binary_vectorizer:
+            pad[indices] = 1
+        else:
             count = Counter(indices)
             pad[list(count.keys())] = np.array(list(count.values()))
-        else:
-            pad[indices] = 1
-            
         return pad
 
     def _embed_series(self, texts: pd.Series, show_progress: bool = False) -> pd.Series:
