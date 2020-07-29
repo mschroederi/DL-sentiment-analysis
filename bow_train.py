@@ -4,14 +4,13 @@ import numpy as np
 import pandas as pd
 
 from torch import nn, optim
-from torch.utils.data import Dataset, DataLoader
 from typing import Dict, List
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
 from sklearn.model_selection import train_test_split
 
-from embeddings.bag_of_words import BagOfWords
-from models.bow_classifier import BowClassifier, DeepBowClassifier
+from app.embeddings.bag_of_words import BagOfWords
+from app.models.bow_classifier import BowClassifier
+
 
 class BowMovieSentimentDataset(Dataset):
     """Movie sentiment dataset."""

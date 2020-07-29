@@ -1,24 +1,14 @@
-import torch
-import numpy as np
 from torch import nn, optim
-from torch.utils.data import Dataset, DataLoader
-from typing import Dict, List
+from typing import Dict
 
-from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
-from embeddings.bag_of_words import BagOfWords
-from models.bow_classifier import BowClassifier
+from app.models.bow_classifier import BowClassifier
 
-
-import os
-import ast
-import io
 import torch
 import pandas as pd
 import numpy as np
 import pickle
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
-from preprocessing.preprocessor import Preprocessor
+from app.preprocessing.preprocessor import Preprocessor
 
 class GloveMovieSentimentDataset(Dataset):
     """Movie sentiment dataset."""

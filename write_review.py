@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from tkinter import *
 
-from embeddings.bag_of_words import BagOfWords
+from app.embeddings.bag_of_words import BagOfWords
 
 
 def evaluate(event):

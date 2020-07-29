@@ -1,11 +1,10 @@
-import torch
 import numpy as np
 import pandas as pd
 from torch import Tensor
 from typing import List, Set
 from collections import Counter
 
-from embeddings.label_encoder import LabelEncoderExt
+from app.embeddings.label_encoder import LabelEncoderExt
 
 SYMBOLS_TO_REMOVE = [".", "\"", "(", ")", ",", "?", "!", "'", ";", "{", "}", "-", "*", "=", ":", "\x91", "\x97", "<br />", "/", "<", ">"]
 

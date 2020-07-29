@@ -8,7 +8,7 @@ from torch.utils.data import DataLoader
 from typing import Dict, List
 
 from bow_train import BowMovieSentimentDataset
-from embeddings.bag_of_words import BagOfWords
+from app.embeddings.bag_of_words import BagOfWords
 
 def evaluation(model: nn.Module, embedding) -> None:
     # Find the words that are responsible for sentiment

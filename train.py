@@ -1,15 +1,26 @@
 import torch
-import sklearn
 from torch import nn, optim
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 
-from data_loader import MovieSentimentDataset, MovieSentimentDatasetBuilder
-from models.lstm_classifier import LSTMClassifier
-from models.attention_rnn_classifier import AttentionRNNClassifier
-from sklearn.feature_extraction.text import CountVectorizer
-from embeddings.sequence_tokenizer import SequenceTokenizer
-from preprocessing.preprocessor import Preprocessor
-from regularizer.early_stopping import EarlyStopping
+from data_loading import MovieSentimentDataset, MovieSentimentDatasetBuilder
+from architecture import AttentionRNNClassifier
+from app.embeddings.sequence_tokenizer import SequenceTokenizer
+from app.preprocessing.preprocessor import Preprocessor
+from app.regularizer.early_stopping import EarlyStopping
+
+
+# Preprocess reviews
+def execute_preprocessing_pipeline(dataset: MovieSentimentDataset, tokenizer=None):
+    reviews = dataset.movie_sentiments["review"]
+    dataset.movie_sentiments["review"] = Preprocessor.remove_symbols(dataset.movie_sentiments["review"])
+    dataset.movie_sentiments = Preprocessor.remove_long_sequences(dataset.movie_sentiments, max_len=1000)
+
+    if tokenizer is None:
+        tokenizer = SequenceTokenizer()
+        tokenizer.fit(dataset.movie_sentiments["review"])
+    dataset.movie_sentiments["review"] = tokenizer.transform(dataset.movie_sentiments["review"])
+    return tokenizer
+
 
 if __name__ == '__main__':
     if torch.cuda.is_available():
@@ -25,36 +36,19 @@ if __name__ == '__main__':
         .from_csv(csv_file='data/train.csv')\
         .with_train_validation_split(splits=[.8, .2])\
         .build()
-    dataset_test = MovieSentimentDatasetBuilder\
-        .from_csv(csv_file='data/test.csv')\
-        .build()
     
     # Restrict the number of reviews if running on the CPU
     if enable_sampling:
         dataset_train.movie_sentiments = dataset_train.movie_sentiments.sample(100)
         dataset_validation.movie_sentiments = dataset_validation.movie_sentiments.sample(20)
-
-    # Preprocess reviews
-    def execute_preprocessing_pipeline(dataset: MovieSentimentDataset, tokenizer=None):
-        reviews = dataset.movie_sentiments["review"]
-        dataset.movie_sentiments["review"] = Preprocessor.remove_symbols(dataset.movie_sentiments["review"])
-        dataset.movie_sentiments = Preprocessor.remove_long_sequences(dataset.movie_sentiments, max_len=1000)
-
-        if tokenizer is None:
-            tokenizer = SequenceTokenizer()
-            tokenizer.fit(dataset.movie_sentiments["review"])
-        dataset.movie_sentiments["review"] = tokenizer.transform(dataset.movie_sentiments["review"])
-        return tokenizer
     
     tokenizer = execute_preprocessing_pipeline(dataset_train)
     vocab_size, padding_size = tokenizer.vocab_size, tokenizer.padding_size
     execute_preprocessing_pipeline(dataset_validation, tokenizer=tokenizer)
-    execute_preprocessing_pipeline(dataset_test, tokenizer=tokenizer)
 
     # Create DataLoader
     dataloader_train = DataLoader(dataset_train, batch_size=128, shuffle=True, num_workers=1)
     dataloader_validation = DataLoader(dataset_validation, batch_size=256, shuffle=False, num_workers=1)
-    dataloader_test = DataLoader(dataset_test, batch_size=256, shuffle=False, num_workers=1)
 
     # Set up a bag of words model and training
     #model = LSTMClassifier(vocab_size=vocab_size, padding_size=padding_size, embedding_size=200, hidden_size=32).to(device)
@@ -100,19 +94,7 @@ if __name__ == '__main__':
         perform_early_stop = early_stopping.track(epoch=epoch, model=model, validation_loss=validation_loss)
         if perform_early_stop:
             print("Stopping early as no improvement was reached for {} epochs".format(early_stopping.patience))
-            early_stopping.get_best_version(model)
+            model = early_stopping.get_best_version(model)
             break
-
-    test_loss, test_acc, n = 0, 0, 0
-    with torch.no_grad():
-        for i_batch, sample_batched in enumerate(dataloader_test):
-            y = sample_batched["sentiment"].type(torch.FloatTensor).to(device).reshape(-1, 1)
-            y_hat = model(sample_batched["review"].to(device).reshape(-1, padding_size))
-            l = loss(y_hat, y)
-            test_loss += l.item()
-            test_acc += (y == (y_hat > .5).type(torch.FloatTensor).to(device)).sum().item()
-            n += len(y)
-        
-    test_loss /= n
-    test_acc /= n
-    print("Test Loss: {}, Test acc: {}".format(test_loss, test_acc))
+    # Store the vocabulary used for training
+    tokenizer.store_vocab("sequence_vocab.txt")

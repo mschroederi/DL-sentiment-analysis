@@ -3,13 +3,25 @@ import numpy as np
 import pandas as pd
 from torch import Tensor
 from sklearn import preprocessing
-from typing import List, Set
+from typing import List, Set, Dict
+
 
 class SequenceTokenizer:
 
-    def __init__(self):
-        self.vocab = dict({"EOS": 0})
-        self.padding_size = -1
+    def __init__(self, vocab: Dict[str, int] = None, padding_size: int = -1):
+        self.vocab = vocab if vocab else dict({"EOS": 0})
+        self.vocab_size = len(self.vocab)
+        self.padding_size = padding_size
+
+    @classmethod
+    def from_vocab_file(cls, file: str, padding_size: int):
+        with open(file, "r") as f:
+            vocab = {word: idx for idx, word in enumerate(f.read().splitlines())}
+        return cls(vocab, padding_size)
+
+    def store_vocab(self, file: str):
+        with open(file, "w") as f:
+            f.write("\n".join(self.vocab.keys()))
 
     def fit(self, reviews: pd.Series):
         for review in reviews:
@@ -25,6 +37,8 @@ class SequenceTokenizer:
         tokenized = np.array([self.vocab[word] for word in review.split() if word in self.vocab])
         if len(tokenized) < self.padding_size:
             tokenized = np.append(np.array([0 for _ in range(self.padding_size - len(tokenized))]), tokenized)
+        elif len(tokenized) > self.padding_size:
+            tokenized = tokenized[:self.padding_size]
         return torch.from_numpy(tokenized).long()
 
     def transform(self, reviews: pd.Series):

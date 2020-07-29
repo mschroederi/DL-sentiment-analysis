@@ -24,9 +24,10 @@ class EarlyStopping():
                 return True
     
     def save_model(self, model):
-        torch.save(model.state_dict(), self.checkpoint_path)
+        torch.save(model, self.checkpoint_path)
 
     def get_best_version(self, model):
         if self.best_validation_loss is math.inf:
             raise Exception('Cannot bet best model. No model stored yet.')
-        model.load_state_dict(torch.load(self.checkpoint_path))
+        # model.load_state_dict(torch.load(self.checkpoint_path))
+        return torch.load(self.checkpoint_path)
