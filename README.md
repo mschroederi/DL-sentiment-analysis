@@ -1,7 +1,45 @@
 # DL-sentiment-analysis
 
-### Glove Embedding
+### Movie Reviews
+We retrieved the movie reviews from http://ai.stanford.edu/~amaas/data/sentiment/.
+We processed them and created a `train.csv` and `test.csv` which can be found in the `/data` folder for easier usage.
 
-In order to use the GloVe embedding please download the [glove dataset](http://nlp.stanford.edu/data/wordvecs/glove.6B.zip), unzip it and move the glove.6B.50d.txt to the `/data` folder.
-Then execute `glove_data_loading.py` in order to create the glove dictionary.  
-See usage in `glove_train.py`
+### Setup
+The project uses `Python >=3.6` in general and `torch` as machine learning library. Additional necessary libraries can
+be found in `requirements.txt`. We recommend to create a virtual environment and install them as follows:
+
+```
+pip install -r requirements.txt 
+```
+
+### Training
+```
+python train.py
+```
+
+| Parameter          | Default          | Description                                                                  |
+|--------------------|------------------|------------------------------------------------------------------------------|
+| --model-checkpoint | `model.pt`       | File location where the trained model will be stored.                        |
+| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer will be stored. |
+| --grid-search      | `False`          | If `True` performs grid-search to find the best model configuration.         |
+| --num-epochs       | `50`             | The number of epochs for training.                                           |
+| --patience         | `5`              | The number of epochs early-stopping is waiting for significant changes.      |
+
+
+### Testing
+```
+python test.py --model-checkpoint model.pt
+```
+| Parameter          | Default          | Description                                                                           |
+|--------------------|------------------|---------------------------------------------------------------------------------------|
+| --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
+| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+
+### Write your own review
+```
+python write_review.py --model-checkpoint model.pt
+```
+| Parameter          | Default          | Description                                                                           |
+|--------------------|------------------|---------------------------------------------------------------------------------------|
+| --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
+| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
