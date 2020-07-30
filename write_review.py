@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--model-checkpoint', type=str, default="model.pt", dest="model_checkpoint",
                         help='File location where the model from training is stored.')
-    parser.add_argument('--vocab-checkpoint', type=str, default="data/vocab.txt", dest="vocab_checkpoint",
+    parser.add_argument('--vocab-checkpoint', type=str, default="checkpoints/vocab.txt", dest="vocab_checkpoint",
                         help='File location where the vocabulary of the sequence tokenizer from training is stored.')
 
     return parser.parse_args()
@@ -35,7 +35,7 @@ def evaluate(event):
 
 args = parse_args()
 
-model: LSTMClassifier = torch.load(args.model_checkpoint)
+model: LSTMClassifier = torch.load(args.model_checkpoint, map_location=torch.device('cpu'))
 padding_size = model.padding_size
 tokenizer = SequenceTokenizer.from_vocab_file(args.vocab_checkpoint, padding_size)
 model.eval()

@@ -2,6 +2,10 @@ import torch
 from torch import nn
 
 class AttentionRNNClassifier(nn.Module):
+    """
+        This is just an experimental implementation of an attention based RNN classifier and not referenced in our paper.
+        But first experiments showed promising results in performance on test data.
+    """
     def __init__(self, vocab_size: int, padding_size: int, embedding_size: int, hidden_size: int, attn_encoder_hidden_size: int=32):
         super(AttentionRNNClassifier, self).__init__()
         self.vocab_size = vocab_size
@@ -39,6 +43,5 @@ class AttentionRNNClassifier(nn.Module):
         seq_encoder_hidden = seq_encoder_hidden.reshape(-1, 2*self.hidden_size)
 
         seq_hidden_attn_hidden = torch.cat((attn_encoded_hidden, seq_encoder_hidden), dim=1)
-
 
         return self.out(seq_hidden_attn_hidden)
