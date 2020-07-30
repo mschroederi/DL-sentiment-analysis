@@ -3,6 +3,7 @@ import pandas as pd
 SYMBOLS_TO_REMOVE = [".", "\"", "(", ")", ",", "?", "!", "'", ";", "{", "}", "-", "*", "=", ":", "\x91", "\x97", "<br />", "/", "<", ">"]
 
 class Preprocessor:
+    @staticmethod
     def preprocess_text(text: str):
         for symbol in SYMBOLS_TO_REMOVE:
             text = text.replace(symbol, " ")
@@ -17,3 +18,4 @@ class Preprocessor:
     def remove_long_sequences(df: pd.DataFrame, max_len: int) -> pd.Series:
         seq_lengths = df["review"].apply(lambda text: len(text.split()))
         return df[seq_lengths <= max_len]
+

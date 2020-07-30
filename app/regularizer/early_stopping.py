@@ -2,7 +2,7 @@ import torch
 import math
 
 class EarlyStopping():
-    def __init__(self, patience: int=3, checkpoint_path: str='best_model.pt', verbose: bool=True):
+    def __init__(self, patience: int=5, checkpoint_path: str='best_model.pt', verbose: bool=True):
         super().__init__()
         self.patience = patience
         self.checkpoint_path = checkpoint_path
@@ -29,5 +29,4 @@ class EarlyStopping():
     def get_best_version(self, model):
         if self.best_validation_loss is math.inf:
             raise Exception('Cannot bet best model. No model stored yet.')
-        # model.load_state_dict(torch.load(self.checkpoint_path))
         return torch.load(self.checkpoint_path)
