@@ -7,9 +7,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--test-data-path', type=str, default="data/test.csv", dest="test_data_path",
                         help='File location where the processed test data is stored.')
-    parser.add_argument('--model-checkpoint', type=str, default="bow_model.pt", dest="model_checkpoint",
+    parser.add_argument('--model-checkpoint', type=str, default="checkpoints/bow_model.pt", dest="model_checkpoint",
                         help='File location where the model from training is stored.')
-    parser.add_argument('--vocab-checkpoint', type=str, default="data/bow_vocab.txt", dest="vocab_checkpoint",
+    parser.add_argument('--vocab-checkpoint', type=str, default="checkpoints/bow_vocab.txt", dest="vocab_checkpoint",
                         help='File location where the vocabulary of the sequence tokenizer from training is stored.')
 
     return parser.parse_args()

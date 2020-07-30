@@ -7,9 +7,9 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--train-data-path', type=str, default="data/train.csv", dest="train_data_path",
                         help='File location where the processed training data is stored.')
-    parser.add_argument('--model-checkpoint', type=str, default="bow_model.pt", dest="model_checkpoint",
+    parser.add_argument('--model-checkpoint', type=str, default="checkpoints/bow_model.pt", dest="model_checkpoint",
                         help='File location where the trained model will be stored.')
-    parser.add_argument('--vocab-checkpoint', type=str, default="data/bow_vocab.txt", dest="vocab_checkpoint",
+    parser.add_argument('--vocab-checkpoint', type=str, default="checkpoints/bow_vocab.txt", dest="vocab_checkpoint",
                         help='File location where the vocabulary of the tokenizer will be stored.')
     parser.add_argument('--num-epochs', type=int, default=3, dest="num_epochs",
                         help='The number of epochs for training.')

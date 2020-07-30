@@ -56,3 +56,40 @@ python write_review.py --model-checkpoint model.pt
 |--------------------|------------------|---------------------------------------------------------------------------------------|
 | --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
 | --vocab-checkpoint | `checkpoints/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+
+
+---
+
+### Alternative Model: bag-of-words
+
+#### Training
+```
+python bow_train.py
+```
+| Parameter          | Default          | Description                                                                  |
+|--------------------|------------------|------------------------------------------------------------------------------|
+| --train-data-path  | `data/train.csv` | File location where the processed training data is stored.                   |
+| --model-checkpoint | `checkpoints/bow_model.pt`       | File location where the trained model will be stored.                        |
+| --vocab-checkpoint | `checkpoints/vocab.txt` | File location where the vocabulary of the sequence tokenizer will be stored. |
+| --num-epochs       | `3`             | The number of epochs for training.                                           |
+
+
+#### Testing
+```
+python bow_test.py --model-checkpoint bow_model.pt
+```
+| Parameter          | Default          | Description                                                                           |
+|--------------------|------------------|---------------------------------------------------------------------------------------|
+| --test-data-path   | `data/test.csv`  | File location where the processed test data is stored.                                |
+| --model-checkpoint | `checkpoints/bow_model.pt`       | File location where the model from training is stored.                                |
+| --vocab-checkpoint | `checkpoints/bow_vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+
+
+#### Write your own review
+```
+python bow_write_review.py --model-checkpoint checkpoints/bow_model.pt
+```
+| Parameter          | Default          | Description                                                                           |
+|--------------------|------------------|---------------------------------------------------------------------------------------|
+| --model-checkpoint | `checkpoints/bow_model.pt`       | File location where the model from training is stored.                                |
+| --vocab-checkpoint | `checkpoints/bow_vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
