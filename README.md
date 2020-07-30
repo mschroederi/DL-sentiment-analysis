@@ -76,7 +76,7 @@ python bow_train.py
 
 #### Testing
 ```
-python bow_test.py --model-checkpoint bow_model.pt
+python bow_test.py --model-checkpoint checkpoints/bow_model.pt
 ```
 | Parameter          | Default          | Description                                                                           |
 |--------------------|------------------|---------------------------------------------------------------------------------------|
@@ -93,3 +93,8 @@ python bow_write_review.py --model-checkpoint checkpoints/bow_model.pt
 |--------------------|------------------|---------------------------------------------------------------------------------------|
 | --model-checkpoint | `checkpoints/bow_model.pt`       | File location where the model from training is stored.                                |
 | --vocab-checkpoint | `checkpoints/bow_vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+
+
+### Alternative Model: BERT (Bidirectional Encoder Representations from Transformers)
+
+The experiments regarding BERT can be found in [notebook](BERT_Transformers.ipynb). The notebook includes data preprocessing, training and testing. In addition, it is possible to validate certain configuration of BERT. The notebook is inspired by http://mccormickml.com/2019/07/22/BERT-fine-tuning/.
