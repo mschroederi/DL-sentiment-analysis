@@ -1,12 +1,12 @@
 # Movie Sentiment Analysis ![PyTorch Logo](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-flame.png)
 
 **TL;DR**   
+Execute and evaluate locally
 ```
 git clone https://github.com/mschroederi/DL-sentiment-analysis.git && cd DL-sentiment-analysis && pip install -r requirements.txt
-```
-```
 python write_review.py --model-checkpoint model.pt
 ```
+or take a look at our [demo notebook](demo.ipynb).
 
 ### Movie Reviews
 We retrieved the movie reviews from http://ai.stanford.edu/~amaas/data/sentiment/.
