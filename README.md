@@ -1,4 +1,12 @@
-# Movie Sentiment Analysis ![PyTorch Logo](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-flame.png)
+# Movie Sentiment Analysis ![PyTorch Logo](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-flame.svg)
+
+**TL;DR**   
+Execute and evaluate locally
+```
+git clone https://github.com/mschroederi/DL-sentiment-analysis.git && cd DL-sentiment-analysis && pip install -r requirements.txt
+python write_review.py --model-checkpoint model.pt
+```
+or take a look at our [demo notebook](demo.ipynb).
 
 ### Movie Reviews
 We retrieved the movie reviews from http://ai.stanford.edu/~amaas/data/sentiment/.
@@ -9,6 +17,9 @@ The project uses `Python >=3.6` in general and `torch` as machine learning libra
 be found in `requirements.txt`. We recommend to create a virtual environment and install them as follows:
 
 ```
+git clone https://github.com/mschroederi/DL-sentiment-analysis.git
+cd DL-sentiment-analysis
+
 pip install -r requirements.txt 
 ```
 
