@@ -1,8 +1,20 @@
+import argparse
+
 import torch
 import numpy as np
 from tkinter import *
 
 from app.embeddings.bag_of_words import BagOfWords
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model-checkpoint', type=str, default="bow_model.pt", dest="model_checkpoint",
+                        help='File location where the model from training is stored.')
+    parser.add_argument('--vocab-checkpoint', type=str, default="data/bow_vocab.txt", dest="vocab_checkpoint",
+                        help='File location where the vocabulary of the tokenizer from training is stored.')
+
+    return parser.parse_args()
 
 
 def evaluate(event):
@@ -24,11 +36,11 @@ def evaluate(event):
     unknown.config(text = "Unknown Words: " + ", ".join(unknown_words))
     
 
-embedding = BagOfWords.from_vocab_file("data/bow_vocab.txt")
+args = parse_args()
+embedding = BagOfWords.from_vocab_file(args.vocab_checkpoint)
 le = embedding.embedding
 le_dict = dict(zip(le.classes_, le.transform(le.classes_)))
-checkpoint_loc = "checkpoints/bow_model"
-model = torch.load(checkpoint_loc)
+model = torch.load(args.model_checkpoint)
 model.eval()
 
 w = Tk()
