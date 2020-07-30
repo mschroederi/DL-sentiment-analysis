@@ -93,8 +93,8 @@ def evaluation(model: nn.Module, embedding) -> None:
 class BowClassifierTrainer:
     @staticmethod
     def train(train_data_path: str = 'data/train.csv',
-              model_checkpoint_path: str = 'bow_model.pt',
-              vocab_checkpoint_path: str = 'data/bow_vocab.txt',
+              model_checkpoint_path: str = 'checkpoints/bow_model.pt',
+              vocab_checkpoint_path: str = 'checkpoints/bow_vocab.txt',
               num_epochs: int = 3):
         train_df = pd.read_csv(train_data_path)
         train_df["review"] = Preprocessor.remove_symbols(train_df["review"])

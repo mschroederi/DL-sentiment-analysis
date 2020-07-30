@@ -13,8 +13,8 @@ from app.trainers.bow_classifier_trainer import test
 class BowClassifierTester:
     @staticmethod
     def test(test_data_path: str = 'data/test.csv',
-            model_checkpoint_path: str = "bow_model.pt",
-            vocab_path: str = "data/bow_vocab.txt"):
+            model_checkpoint_path: str = "checkpoints/bow_model.pt",
+            vocab_path: str = "checkpoints/bow_vocab.txt"):
         test_df = pd.read_csv(test_data_path)
         test_df["review"] = Preprocessor.remove_symbols(test_df["review"])
         embedding = BagOfWords.from_vocab_file(vocab_path)

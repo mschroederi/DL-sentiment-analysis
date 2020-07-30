@@ -27,8 +27,5 @@ class LabelEncoderExt(object):
         encoded = [self.le_dict[w] for w in words if w in self.le_dict]
         return encoded
 
-    def __getattr__(self, name):
-        """
-        Pass every method to the underlying label_encoder.
-        """
-        return getattr(self.label_encoder, name)
+    def inverse_transform(self, y):
+        return self.label_encoder.inverse_transform(y)

@@ -11,3 +11,5 @@ data/glove.6B.50d.txt
 data/6B.50_**.pkl
 
 .ipynb_checkpoints/
+
+**/.DS_Store
