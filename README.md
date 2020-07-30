@@ -1,4 +1,4 @@
-# DL-sentiment-analysis
+# Movie Sentiment Analysis ![PyTorch Logo](https://github.com/pytorch/pytorch/blob/master/docs/source/_static/img/pytorch-logo-flame.png)
 
 ### Movie Reviews
 We retrieved the movie reviews from http://ai.stanford.edu/~amaas/data/sentiment/.
