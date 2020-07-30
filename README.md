@@ -19,6 +19,7 @@ python train.py
 
 | Parameter          | Default          | Description                                                                  |
 |--------------------|------------------|------------------------------------------------------------------------------|
+| --train-data-path  | `data/train.csv` | File location where the processed training data is stored.                   |
 | --model-checkpoint | `model.pt`       | File location where the trained model will be stored.                        |
 | --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer will be stored. |
 | --grid-search      | `False`          | If `True` performs grid-search to find the best model configuration.         |
@@ -32,6 +33,7 @@ python test.py --model-checkpoint model.pt
 ```
 | Parameter          | Default          | Description                                                                           |
 |--------------------|------------------|---------------------------------------------------------------------------------------|
+| --test-data-path   | `data/test.csv`  | File location where the processed test data is stored.                                |
 | --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
 | --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
 
