@@ -18,3 +18,4 @@ class Preprocessor:
     def remove_long_sequences(df: pd.DataFrame, max_len: int) -> pd.Series:
         seq_lengths = df["review"].apply(lambda text: len(text.split()))
         return df[seq_lengths <= max_len]
+
