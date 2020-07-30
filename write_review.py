@@ -1,34 +1,43 @@
-import torch
-import numpy as np
+import argparse
 from tkinter import *
 
-from app.embeddings.bag_of_words import BagOfWords
+import numpy as np
+import torch
+
+from app.embeddings.sequence_tokenizer import SequenceTokenizer
+from app.models.lstm_classifier import LSTMClassifier
+from app.preprocessing.preprocessor import Preprocessor
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model-checkpoint', type=str, default="model.pt", dest="model_checkpoint",
+                        help='File location where the model from training is stored.')
+    parser.add_argument('--vocab-checkpoint', type=str, default="data/vocab.txt", dest="vocab_checkpoint",
+                        help='File location where the vocabulary of the sequence tokenizer from training is stored.')
+
+    return parser.parse_args()
 
 
 def evaluate(event):
     review = entry.get("1.0", END)
-    preprocessed = BagOfWords.preprocess_text(review).split()
+    preprocessed = Preprocessor.preprocess_text(review)
+    tokenized = tokenizer._SequenceTokenizer__transform_single_review(preprocessed)
 
-    known_words = list(filter(lambda x: x in le_dict, preprocessed))
-    unknown_words = list(set(preprocessed) - set(known_words))
-
-    embedded = embedding.embedding.transform(known_words)
-    spread = embedding.spread_indices(embedded)
-
-    X = torch.Tensor(spread)
-    y = model(X)
-    prob = torch.sigmoid(y).item()
+    with torch.no_grad():
+        X = torch.tensor(tokenized).reshape(-1, padding_size)
+        y = model(X).reshape(-1, 1)
+        prob = y.flatten().item()
     percentage = np.round(prob * 100, 2)
 
-    res.config(text = "Positive Review: {}%".format(percentage))
-    unknown.config(text = "Unknown Words: " + ", ".join(unknown_words))
-    
+    res.config(text="Positive Review: {}%".format(percentage))
 
-embedding = BagOfWords.from_vocab_file("data/bow_vocab.txt")
-le = embedding.embedding
-le_dict = dict(zip(le.classes_, le.transform(le.classes_)))
-checkpoint_loc = "checkpoints/bow_model"
-model = torch.load(checkpoint_loc)
+
+args = parse_args()
+
+model: LSTMClassifier = torch.load(args.model_checkpoint)
+padding_size = model.padding_size
+tokenizer = SequenceTokenizer.from_vocab_file(args.vocab_checkpoint, padding_size)
 model.eval()
 
 w = Tk()
@@ -38,11 +47,4 @@ entry.bind("<KeyRelease>", evaluate)
 entry.pack()
 res = Label(w)
 res.pack()
-unknown = Label(w)
-unknown.pack()
 w.mainloop()
-
-# if __name__ == "__main__":
-#     x = np.zeros(10)
-#     x[[1,5,9]] = [1, 2, 3]
-#     print(x)
