@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 
 from app.embeddings.bag_of_words import BagOfWords
 from app.models.bow_classifier import BowClassifier
+from app.preprocessing.preprocessor import Preprocessor
 
 
 class BowMovieSentimentDataset(Dataset):
@@ -21,13 +22,13 @@ class BowMovieSentimentDataset(Dataset):
             csv_file (string): Path to the csv file with sentiments.
         """
         self.movie_sentiments = movie_sentiments.copy()
-        self.movie_sentiments["review"] = self.movie_sentiments["review"].apply(ast.literal_eval)
+        self.movie_sentiments["review"] = self.movie_sentiments["review"]
         self.embedding = embedding
         self.binary_vectorizer = binary_vectorizer
 
     @classmethod
     def from_csv(cls, csv_file: str, embedding: BagOfWords, binary_vectorizer: bool = True):
-        df = pd.read_csv(csv_file)
+        df = pd.read_csv(csv_file).apply(ast.literal_eval)
         return cls(df, embedding, binary_vectorizer)
 
     def __len__(self):
@@ -124,13 +125,21 @@ def evaluation(model: nn.Module, embedding) -> None:
 
 
 if __name__ == "__main__":
-    embedding = BagOfWords.from_vocab_file("data/bow_vocab2.txt")
+    train_df = pd.read_csv("data/train.csv")
+    test_df = pd.read_csv("data/test.csv")
+
+    train_df["review"] = Preprocessor.remove_symbols(train_df["review"])
+    test_df["review"] = Preprocessor.remove_symbols(test_df["review"])
+    print("Removed Symbols")
+
+    embedding = BagOfWords.from_pandas(train_df["review"])
     vocab_size = len(embedding.vocab)
     print("Vocab Size: {}".format(vocab_size))
 
-    df = pd.read_csv("data/bow_train2.csv")
-    train_df, validation_df = train_test_split(df, train_size=0.8)
-    # train_df = df
+    train_df["review"] = embedding._embed_series(train_df["review"])
+    test_df["review"] = embedding._embed_series(test_df["review"])
+
+    train_df, validation_df = train_test_split(train_df, train_size=0.8)
 
     train_dataset = BowMovieSentimentDataset(train_df, embedding=embedding, binary_vectorizer=True)
     train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=4)
@@ -138,7 +147,7 @@ if __name__ == "__main__":
     validation_dataset = BowMovieSentimentDataset(validation_df, embedding=embedding, binary_vectorizer=True)
     validation_loader = DataLoader(validation_dataset, batch_size=256, shuffle=True, num_workers=4)
     print("Created Validation Batches")
-    test_dataset = BowMovieSentimentDataset.from_csv(csv_file="data/bow_test2.csv", embedding=embedding, binary_vectorizer=True)
+    test_dataset = BowMovieSentimentDataset(test_df, embedding=embedding, binary_vectorizer=True)
     test_loader = DataLoader(test_dataset, batch_size=1024, shuffle=True, num_workers=4)
     print("Created Test Batches")
     # validation_loader = test_loader
@@ -163,9 +172,11 @@ if __name__ == "__main__":
         results = test(model, validation_loader, embedding, loss)
         print("Epoch: {}, Train Loss: {}, Validation Loss: {}, Validation Acc: {}".format(epoch+1, train_loss_epoch, results["loss"], results["accuracy"]))
 
-    checkpoint_loc = "checkpoints/bow_model"
+    checkpoint_loc = "bow_model.pt"
     torch.save(model, checkpoint_loc)
     print("Saved Model")
+    embedding.store_vocab("data/bow_vocab.txt")
+    print("Stored vocab")
     final_results = test(model, test_loader, embedding, loss)
     print("Test Acc: {}".format(final_results["accuracy"]))
     # evaluation(model, embedding)
