@@ -21,7 +21,7 @@ python train.py
 |--------------------|------------------|------------------------------------------------------------------------------|
 | --train-data-path  | `data/train.csv` | File location where the processed training data is stored.                   |
 | --model-checkpoint | `model.pt`       | File location where the trained model will be stored.                        |
-| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer will be stored. |
+| --vocab-checkpoint | `checkpoints/vocab.txt` | File location where the vocabulary of the sequence tokenizer will be stored. |
 | --grid-search      | `False`          | If `True` performs grid-search to find the best model configuration.         |
 | --num-epochs       | `50`             | The number of epochs for training.                                           |
 | --patience         | `5`              | The number of epochs early-stopping is waiting for significant changes.      |
@@ -35,7 +35,7 @@ python test.py --model-checkpoint model.pt
 |--------------------|------------------|---------------------------------------------------------------------------------------|
 | --test-data-path   | `data/test.csv`  | File location where the processed test data is stored.                                |
 | --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
-| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+| --vocab-checkpoint | `checkpoints/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
 
 ### Write your own review
 ```
@@ -44,4 +44,4 @@ python write_review.py --model-checkpoint model.pt
 | Parameter          | Default          | Description                                                                           |
 |--------------------|------------------|---------------------------------------------------------------------------------------|
 | --model-checkpoint | `model.pt`       | File location where the model from training is stored.                                |
-| --vocab-checkpoint | `data/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
+| --vocab-checkpoint | `checkpoints/vocab.txt` | File location where the vocabulary of the sequence tokenizer from training is stored. |
