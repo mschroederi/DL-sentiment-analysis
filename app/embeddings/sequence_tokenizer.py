@@ -9,7 +9,7 @@ from typing import List, Set, Dict
 class SequenceTokenizer:
 
     def __init__(self, vocab: Dict[str, int] = None, padding_size: int = -1):
-        self.vocab = vocab if vocab else dict({"EOS": 0})
+        self.vocab = vocab if vocab else dict({"<SOS>": 0})
         self.vocab_size = len(self.vocab)
         self.padding_size = padding_size
 

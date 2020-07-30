@@ -3,6 +3,7 @@ import pandas as pd
 SYMBOLS_TO_REMOVE = [".", "\"", "(", ")", ",", "?", "!", "'", ";", "{", "}", "-", "*", "=", ":", "\x91", "\x97", "<br />", "/", "<", ">"]
 
 class Preprocessor:
+    @staticmethod
     def preprocess_text(text: str):
         for symbol in SYMBOLS_TO_REMOVE:
             text = text.replace(symbol, " ")

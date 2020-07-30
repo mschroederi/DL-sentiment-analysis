@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 
-
 class LSTMClassifier(nn.Module):
     def __init__(self, vocab_size: int, padding_size: int, embedding_size: int, hidden_size: int):
         super(LSTMClassifier, self).__init__()
@@ -11,10 +10,11 @@ class LSTMClassifier(nn.Module):
         self.hidden_size = hidden_size
 
         self.embbedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=embedding_size, padding_idx=0)
-        self.rnn = nn.LSTM(input_size=embedding_size, hidden_size=hidden_size, dropout=1)
+        self.rnn = nn.LSTM(input_size=embedding_size, hidden_size=hidden_size)
 
         self.out = nn.Sequential(
-            nn.Linear(hidden_size, 4), nn.ReLU(),
+            nn.Linear(hidden_size, 32), nn.ReLU(),
+            nn.Linear(32, 4), nn.ReLU(),
             nn.Linear(4, 1), nn.Sigmoid()
         )
 
